@@ -1,8 +1,7 @@
 package com.gmail.nossr50.util.text;
 
 import com.gmail.nossr50.config.RankConfig;
-import com.gmail.nossr50.datatypes.json.McMMOUrl;
-import com.gmail.nossr50.datatypes.json.McMMOWebLinks;
+import com.gmail.nossr50.datatypes.json.McMMOWebLink;
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
 import com.gmail.nossr50.datatypes.skills.SubSkillType;
 import com.gmail.nossr50.datatypes.skills.subskills.AbstractSubSkill;
@@ -31,8 +30,10 @@ import java.util.Locale;
 /**
  * This class handles many of the JSON components that mcMMO makes and uses
  */
-public class TextComponentFactory {
+public final class TextComponentFactory {
 
+    private TextComponentFactory() {}
+    
     /**
      * Makes a text component using strings from a locale and supports passing an undefined number of variables to the LocaleLoader
      * @param localeKey target locale string address
@@ -90,17 +91,17 @@ public class TextComponentFactory {
 
         mcMMO.getAudiences().player(player).sendMessage(Identity.nil(),TextComponent.ofChildren(
           prefix,
-          getWebLinkTextComponent(McMMOWebLinks.WEBSITE),
+          getWebLinkTextComponent(McMMOWebLink.WEBSITE),
           emptySpace,
-          getWebLinkTextComponent(McMMOWebLinks.DISCORD),
+          getWebLinkTextComponent(McMMOWebLink.DISCORD),
           emptySpace,
-          getWebLinkTextComponent(McMMOWebLinks.PATREON),
+          getWebLinkTextComponent(McMMOWebLink.PATREON),
           emptySpace,
-          getWebLinkTextComponent(McMMOWebLinks.WIKI),
+          getWebLinkTextComponent(McMMOWebLink.WIKI),
           emptySpace,
-          getWebLinkTextComponent(McMMOWebLinks.SPIGOT),
+          getWebLinkTextComponent(McMMOWebLink.SPIGOT),
           emptySpace,
-          getWebLinkTextComponent(McMMOWebLinks.HELP_TRANSLATE),
+          getWebLinkTextComponent(McMMOWebLink.HELP_TRANSLATE),
           suffix
         ), MessageType.SYSTEM);
     }
@@ -134,109 +135,59 @@ public class TextComponentFactory {
         }
     }
 
-    private static Component getWebLinkTextComponent(McMMOWebLinks webLinks)
+    private static @NotNull Component getWebLinkTextComponent(@NotNull McMMOWebLink webLink)
     {
-        TextComponent.Builder webTextComponent;
+        TextComponent.Builder webTextComponent = Component.text().content(LocaleLoader.getString("JSON.Hover.AtSymbolURL"));
+        TextUtils.addChildWebComponent(webTextComponent, webLink.getNiceTitle());
+        webTextComponent.clickEvent(ClickEvent.openUrl(webLink.getUrl()));
 
-        switch(webLinks)
-        {
-            case WEBSITE:
-                webTextComponent = Component.text().content(LocaleLoader.getString("JSON.Hover.AtSymbolURL"));
-                TextUtils.addChildWebComponent(webTextComponent, "Web");
-                webTextComponent.clickEvent(getUrlClickEvent(McMMOUrl.urlWebsite));
-                break;
-            case SPIGOT:
-                webTextComponent = Component.text().content(LocaleLoader.getString("JSON.Hover.AtSymbolURL"));
-                TextUtils.addChildWebComponent(webTextComponent, "Spigot");
-                webTextComponent.clickEvent(getUrlClickEvent(McMMOUrl.urlSpigot));
-                break;
-            case DISCORD:
-                webTextComponent = Component.text().content(LocaleLoader.getString("JSON.Hover.AtSymbolURL"));
-                TextUtils.addChildWebComponent(webTextComponent, "Discord");
-                webTextComponent.clickEvent(getUrlClickEvent(McMMOUrl.urlDiscord));
-                break;
-            case PATREON:
-                webTextComponent = Component.text().content(LocaleLoader.getString("JSON.Hover.AtSymbolURL"));
-                TextUtils.addChildWebComponent(webTextComponent, "Patreon");
-                webTextComponent.clickEvent(getUrlClickEvent(McMMOUrl.urlPatreon));
-                break;
-            case WIKI:
-                webTextComponent = Component.text().content(LocaleLoader.getString("JSON.Hover.AtSymbolURL"));
-                TextUtils.addChildWebComponent(webTextComponent, "Wiki");
-                webTextComponent.clickEvent(getUrlClickEvent(McMMOUrl.urlWiki));
-                break;
-            case HELP_TRANSLATE:
-                webTextComponent = Component.text().content(LocaleLoader.getString("JSON.Hover.AtSymbolURL"));
-                TextUtils.addChildWebComponent(webTextComponent, "Lang");
-                webTextComponent.clickEvent(getUrlClickEvent(McMMOUrl.urlTranslate));
-                break;
-            default:
-                webTextComponent = Component.text().content("NOT DEFINED");
-        }
-
-        TextUtils.addNewHoverComponentToTextComponent(webTextComponent, getUrlHoverEvent(webLinks));
-        webTextComponent.insertion(webLinks.getUrl());
+        TextUtils.addNewHoverComponentToTextComponent(webTextComponent, getUrlHoverEvent(webLink));
+        webTextComponent.insertion(webLink.getUrl());
 
         return webTextComponent.build();
     }
 
-    private static Component getUrlHoverEvent(McMMOWebLinks webLinks)
+    private static @NotNull Component getUrlHoverEvent(@NotNull McMMOWebLink webLink)
     {
-        TextComponent.Builder componentBuilder = Component.text().content(webLinks.getNiceTitle());
+        TextComponent.Builder componentBuilder = Component.text().content(webLink.getNiceTitle());
 
-        switch(webLinks)
+        // Common header
+        addUrlHeaderHover(webLink, componentBuilder);
+        componentBuilder.append(Component.newline()).append(Component.newline());
+        componentBuilder.append(Component.text(webLink.getLocaleDescription(), NamedTextColor.GREEN));
+
+        switch(webLink)
         {
             case WEBSITE:
-                addUrlHeaderHover(webLinks, componentBuilder);
-                componentBuilder.append(Component.newline()).append(Component.newline());
-                componentBuilder.append(Component.text(webLinks.getLocaleDescription(), NamedTextColor.GREEN));
                 componentBuilder.append(Component.text("\nDev Blogs, and information related to mcMMO can be found here", NamedTextColor.GRAY));
                 break;
             case SPIGOT:
-                addUrlHeaderHover(webLinks, componentBuilder);
-                componentBuilder.append(Component.newline()).append(Component.newline());
-                componentBuilder.append(Component.text(webLinks.getLocaleDescription(), NamedTextColor.GREEN));
                 componentBuilder.append(Component.text("\nI post regularly in the discussion thread here!", NamedTextColor.GRAY));
                 break;
             case PATREON:
-                addUrlHeaderHover(webLinks, componentBuilder);
-                componentBuilder.append(Component.newline()).append(Component.newline());
-                componentBuilder.append(Component.text(webLinks.getLocaleDescription(), NamedTextColor.GREEN));
                 componentBuilder.append(Component.newline());
                 componentBuilder.append(Component.text("Show support by buying me a coffee :)", NamedTextColor.GRAY));
                 break;
             case WIKI:
-                addUrlHeaderHover(webLinks, componentBuilder);
-                componentBuilder.append(Component.newline()).append(Component.newline());
-                componentBuilder.append(Component.text(webLinks.getLocaleDescription(), NamedTextColor.GREEN));
                 componentBuilder.append(Component.newline());
                 componentBuilder.append(Component.text("I'm looking for more wiki staff, contact me on our discord!", NamedTextColor.DARK_GRAY));
                 break;
-            case DISCORD:
-                addUrlHeaderHover(webLinks, componentBuilder);
-                componentBuilder.append(Component.newline()).append(Component.newline());
-                componentBuilder.append(Component.text(webLinks.getLocaleDescription(), NamedTextColor.GREEN));
-                break;
             case HELP_TRANSLATE:
-                addUrlHeaderHover(webLinks, componentBuilder);
-                componentBuilder.append(Component.newline()).append(Component.newline());
-                componentBuilder.append(Component.text(webLinks.getLocaleDescription(), NamedTextColor.GREEN));
                 componentBuilder.append(Component.newline());
                 componentBuilder.append(Component.text("You can use this website to help translate mcMMO into your language!" +
                   "\nIf you want to know more contact me in discord.", NamedTextColor.DARK_GRAY));
+                break;
+            case DISCORD:
+            default:
+                break;
         }
 
         return componentBuilder.build();
     }
 
-    private static void addUrlHeaderHover(McMMOWebLinks webLinks, TextComponent.Builder componentBuilder) {
+    private static void addUrlHeaderHover(McMMOWebLink webLinks, TextComponent.Builder componentBuilder) {
         componentBuilder.append(Component.newline());
         componentBuilder.append(Component.text(webLinks.getUrl(), NamedTextColor.GRAY, TextDecoration.ITALIC));
-    }
-
-    private static ClickEvent getUrlClickEvent(String url)
-    {
-        return ClickEvent.openUrl(url);
     }
 
     private static Component getSubSkillTextComponent(Player player, SubSkillType subSkillType)
@@ -320,7 +271,7 @@ public class TextComponentFactory {
         /*
          * Hover Event BaseComponent color table
          */
-        TextColor ccSubSkillHeader      = NamedTextColor.GOLD;
+        //TextColor ccSubSkillHeader      = NamedTextColor.GOLD;
         TextColor ccRank                = NamedTextColor.BLUE;
         TextColor ccCurRank             = NamedTextColor.GREEN;
         TextColor ccPossessive          = NamedTextColor.WHITE;
@@ -426,7 +377,7 @@ public class TextComponentFactory {
         /*
          * Hover Event BaseComponent color table
          */
-        TextColor ccSubSkillHeader      = NamedTextColor.GOLD;
+        //TextColor ccSubSkillHeader      = NamedTextColor.GOLD;
         TextColor ccRank                = NamedTextColor.BLUE;
         TextColor ccCurRank             = NamedTextColor.GREEN;
         TextColor ccPossessive          = NamedTextColor.WHITE;

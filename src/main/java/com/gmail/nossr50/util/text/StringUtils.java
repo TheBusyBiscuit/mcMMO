@@ -11,7 +11,9 @@ import org.jetbrains.annotations.NotNull;
 import java.text.DecimalFormat;
 import java.util.Locale;
 
-public class StringUtils {
+public final class StringUtils {
+
+    private StringUtils() {}
 
     protected static DecimalFormat percent = new DecimalFormat("##0.00%");
     protected static DecimalFormat shortDecimal = new DecimalFormat("##0.0");
@@ -100,7 +102,9 @@ public class StringUtils {
         return StringUtils.getPrettyItemString(data).replace(" ", "_") + "|*";
     }
 
-    public static String getFriendlyConfigBlockDataString(BlockData data) {
+    public static @NotNull String getFriendlyConfigBlockDataString(@NotNull BlockData data) {
+        final String prettyItemString = getPrettyItemString(data.getMaterial()).replace(" ", "_");
+        
         switch(data.getMaterial()){
             case CHORUS_FLOWER:
             case COCOA:
@@ -108,20 +112,21 @@ public class StringUtils {
             case BEETROOTS:
             case CARROTS:
             case POTATOES:
-            case NETHER_WART: {
+            case NETHER_WART: 
                 if (data instanceof Ageable) {
                     Ageable ageData = (Ageable) data;
                     if (ageData.getAge() == ageData.getMaximumAge()) {
-                        return getPrettyItemString(data.getMaterial()).replace(" ", "_") + "_Ripe";
+                        return prettyItemString + "_Ripe";
                     }
                 }
-                return getPrettyItemString(data.getMaterial()).replace(" ", "_") + "_Ungrown";
-            }
+
+                return prettyItemString + "_Ungrown";
+            default:
+                return prettyItemString;
         }
-        return getPrettyItemString(data.getMaterial()).replace(" ", "_");
     }
 
-    public static String getFriendlyConfigMaterialString(Material data) {
+    public static @NotNull String getFriendlyConfigMaterialString(@NotNull Material data) {
         return getPrettyItemString(data).replace(" ", "_");
     }
 

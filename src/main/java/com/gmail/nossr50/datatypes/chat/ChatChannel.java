@@ -4,8 +4,8 @@ import com.gmail.nossr50.locale.LocaleLoader;
 import org.jetbrains.annotations.Nullable;
 
 public enum ChatChannel {
-    ADMIN(LocaleLoader.getString("Commands.AdminChat.On"), LocaleLoader.getString("Commands.AdminChat.Off")),
-    PARTY(LocaleLoader.getString("Commands.Party.Chat.On"), LocaleLoader.getString("Commands.Party.Chat.Off")),
+    ADMIN("Commands.AdminChat.On", "Commands.AdminChat.Off"),
+    PARTY("Commands.Party.Chat.On", "Commands.Party.Chat.Off"),
     PARTY_OFFICER(null, null),
     NONE(null, null);
 
@@ -17,11 +17,11 @@ public enum ChatChannel {
         this.disabledMessage = disabledMessage;
     }
 
-    public String getEnabledMessage() {
-        return enabledMessage;
+    public @Nullable String getEnabledMessage() {
+        return enabledMessage != null ? LocaleLoader.getString(enabledMessage) : null;
     }
 
-    public String getDisabledMessage() {
-        return disabledMessage;
+    public @Nullable String getDisabledMessage() {
+        return disabledMessage != null ? LocaleLoader.getString(disabledMessage) : null;
     }
 }
